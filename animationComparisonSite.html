@@ -1,0 +1,145 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>jQuery vs. velocity vs. animatecss vs. anime.js vs. GSAP Animation</title>
+    <link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+
+        <style>
+        .myDiv {
+          border: 3px solid blue;
+          border-radius: 10px;
+          height: 20px;
+          width: 20px;
+          background-color: rgba(100, 127, 1000, .5);
+          position: fixed;
+          visibility: visible !important;
+        }
+      </style>
+  </head>
+
+  <body>
+
+    <button onclick="jQueryAnimate()">jQuery Toggle Div</button>
+    <button onclick="animateVelocity()">Velocity.js Toggle Div</button>
+    <button onclick="animateAnimateCss()">Animate.css Toggle Div</button>
+    <button onclick="animateAnime()">Anime.js Toggle Div</button>
+    <button onclick="animateGSAP()">GSAP Toggle Div</button>
+    <div id="container"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.5.0/velocity.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.2.0/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/plugins/CSSPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenLite.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/jquery.gsap.min.js"></script>
+    <!-- Actual test script -->
+    <script>
+      var currentState = 0;
+      function jQueryAnimate() {
+        $(".myDiv")
+          .animate(
+          {
+            left: "75%"
+          },
+          {
+            duration: 3000
+          })
+          .delay(250)
+          .animate(
+          {
+            left: 0
+          },
+          {
+            duration: 3000
+          });
+      }
+
+      function animateVelocity() {  
+        $(".myDiv")
+          .velocity(
+          {
+          left: "75%"
+          },
+          {
+            duration: 3000
+          })
+        .delay(250)
+          .velocity(
+          {
+          left: 0
+          },
+          {
+            duration: 3000
+          });
+      }
+
+      // helper method to use animateCss using jQuery
+      $.fn.extend({
+          animateCss: function (animationName, callback) {
+              var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+              this.addClass('animated ' + animationName).one(animationEnd, function() {
+                  $(this).removeClass('animated ' + animationName);
+                  if (callback) {
+                    callback();
+                  }
+              });
+              return this;
+          }
+      });
+
+      var myTimeout;
+      var cachedPosition;
+      function slideBack() {
+        clearTimeout(myTimeout);
+        if (!cachedPosition) {
+          cachedPosition = $(".myDiv").position();
+        }
+        $(".myDiv").position = cachedPosition;
+        myTimeout = setTimeout(function() {
+          console.log(cachedPosition);
+            $(".myDiv")
+              .animateCss('slideOutLeft');
+        }, 50);    
+      }
+
+      function animateAnimateCss() {
+          
+          $(".myDiv")
+            .animateCss('slideOutRight', slideBack);
+      }
+
+      function animateAnime() {
+        var startTime;
+          anime({
+            targets: '.myDiv',
+            left: [
+              { value: "75%", duration: 3000, elasticity: 0 },
+              { value: 0, duration: 3000, delay: 250, elasticity: 0 }
+            ],
+            easing: "linear",
+            begin: function() {
+              startTime = new Date().getTime();
+            },
+            complete: function() {
+              console.log(new Date().getTime() - startTime);
+            }
+          });
+      }
+
+      function animateGSAP() {
+        var tween = new TweenLite(".myDiv", 3, 
+                    {left:"75%",  
+                      onComplete:function() {
+                        setTimeout(() => {
+                          tween.reverse();  
+                        }, 250);
+                      }});
+      }
+      const N = 5000;
+      const elmStr = '<div class="myDiv"></div>';
+      const container = $("#container");
+      for (var i = 0; i < N; i++) {
+        container.append($(elmStr));
+      }
+    </script>
+  </body>
+</html>
